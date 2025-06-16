@@ -1,0 +1,456 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Integrate multi-feature app integration: Zoom App SDK</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14" ga4id=""></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  codelab-ga4id=""
+                  id="how-to-build-collabo-team-chat-zoomapp-framework"
+                  title="Integrate multi-feature app integration: Zoom App SDK"
+                  environment="web"
+                  feedback-link="https://devforum.zoom.us/c/zoom-apps">
+    
+      <google-codelab-step label="Before you begin" duration="0">
+        <p>This codelab is part 10 of 10 in a series focused on extending a Next.js Task Manager app into the Zoom Developer Platform. Throughout this series, you&#39;ll learn how to create a feature-rich Zoom Marketplace app that both integrates third-party applications into Zoom products and brings Zoom functionality into third-party applications. In this series, you will learn core concepts for building engaging experiences within the Zoom Workplace—including Zoom Apps, Team Chat, chatbots, and features for deep linking from browser to Zoom client.</p>
+<h2 is-upgraded>How to use this codelab</h2>
+<p>This codelab is organized by product to help you quickly find information about integrating your app into the Zoom Workplace platform. Each section provides concise, practical code examples that you can adapt to your use cases, along with links to deeper resources on specific topics. For implementation guidance, you can focus on the specific topics most relevant to your needs.</p>
+<p>Part 1: <a href="https://just-zoomit.github.io/multi-feature-zoom-manifest-file/#0" target="_blank">Create a multi-feature Zoom app with a manifest file: Team Chat, Chatbot and Meetings</a></p>
+<p>Part 2: <a href="https://just-zoomit.github.io/zoomapp-taskmanager-codelab/#0" target="_blank">Setup development environment: Zoom, Ngrok, and Supabase developer accounts</a></p>
+<p>Part 3: <a href="https://just-zoomit.github.io/how-to-install-and-authorize-zoom-app-sdk-with-supabase/#0" target="_blank">Install and authorize multi-feature app integration: Zoom App, Team Chat, and Supabase Auth</a></p>
+<p>Part 4: <a href="https://just-zoomit.github.io/how-to-integrate-a-zoomapp-nextjs/#0" target="_blank">Integrate multi-feature Zoom app integration: Chatbot and Team Chat</a></p>
+<p>Part 5: <a href="https://just-zoomit.github.io/how-to-integrate-teamchat-za/#0" target="_blank">Integrate multi-feature app integration: Team Chat</a></p>
+<p>Part 6: <a href="https://just-zoomit.github.io/how-to-deep-link-zoom-client-za/#0" target="_blank">Integrate multi-feature app integration: Deep Linking</a></p>
+<p>Part 7: <a href="https://just-zoomit.github.io/how-to-integrate-webhooks-za/#0" target="_blank">Integrate multi-feature app integration: Webhooks</a></p>
+<p>Part 8: <a href="https://just-zoomit.github.io/how-to-integrate-slash-commands-za/#0" target="_blank">Integrate multi-feature app integration: Slash Commands</a></p>
+<p>Part 9: <a href="https://just-zoomit.github.io/how-to-integrate-zoom-app-sdk/#0" target="_blank">Integrate multi-feature app integration: Zoom App SDK Third Party OAuth</a> UPDATE URL</p>
+<p>Part 10: <a href="https://just-zoomit.github.io/build-collabo-meeting-experiences-zoomapp-sdk/#0" target="_blank">Build collaborative meeting experiences: Zoom App SDK</a></p>
+<p><strong>Part 11: </strong><a target="_blank"><strong>Build collaborative team chat experiences: Zoom App SDK Framework</strong></a></p>
+<p>Part 12: <a target="_blank"><strong>Enable Zoom App Real Time Media Streams: RTMS enable App</strong></a></p>
+<p>Part 13: <a target="_blank"><strong>Embed the Zoom Meeting and Zoom Webinar experiences: Web Meeting SDK</strong></a></p>
+<p>⚠️ <strong>Warning:</strong> This guide assumes you&#39;re familiar building within the Zoom Workspace. You can start here or go back to the beginning of the full guide if you&#39;re new to Zoom App development.</p>
+<p>💡 <strong>Tip:</strong> If you don&#39;t have a paid workspace for development, you can join the <a href="https://api.slack.com/developer-program" target="_blank">Developer Program</a> and provision a sandbox with access to all Zoom Developer platform features for free.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="What you&#39;ll learn" duration="0">
+        <p>How to control the interaction between the app and the Zoom client to build a collaborative experience:</p>
+<ul>
+<li>How to enable and test guest mode</li>
+<li>How to get Zoom Context data</li>
+<li>How to implement logic that accounts for the Zoom running context</li>
+</ul>
+<h2 is-upgraded>What you&#39;ll need</h2>
+<ul>
+<li>Git</li>
+<li>Node.js</li>
+<li>Browser</li>
+<li>Code editor and terminal</li>
+</ul>
+<h2 is-upgraded>Prerequisites</h2>
+<ul>
+<li>A Zoom Developer Account</li>
+<li>A Supabase Account</li>
+<li>A Ngrok Account</li>
+<li>A Upstash Account (Redis Cache)</li>
+</ul>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Project Setup" duration="0">
+        <ol type="1">
+<li>Clone the project and switch to the correct branch:</li>
+</ol>
+<pre><code language="language-bash" class="language-bash">git clone https://github.com/zoom/task-manager-sample.git
+cd task-manager-sample
+git checkout step-8-zoom-app-integration
+
+</code></pre>
+<ol type="1" start="2">
+<li>Install dependencies and start the app:</li>
+</ol>
+<pre><code language="language-bash" class="language-bash">npm install
+npm run dev
+
+</code></pre>
+<p>Now, you have a Task Manager application that implements collborative meeting experience with the Zoom App SDK.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Overview: Build a Collaborative Team Chat App Using the Zoom App Framework" duration="0">
+        <p>In this codelab, you&#39;ll learn how to build a collaborative experience in Zoom Team Chat using the Zoom App Framework. You&#39;ll explore how to create rich, interactive messages and modals using the App Card Builder Kit, and how to integrate messaging features using both the Zoom App SDK and Zoom REST APIs.</p>
+<p>By the end of this guide, you&#39;ll be able to:</p>
+<ul>
+<li>Customize chat messages with the App Card Builder Kit</li>
+<li>Display your app&#39;s webview or modal directly within Zoom Team Chat</li>
+<li>Send messages using the Zoom App Context Preview API</li>
+<li>Programmatically send chat messages via the Zoom App SDK&#39;s sendMessage API</li>
+<li>Unfurl URLs and send branded messages using the Zoom REST API unfurl</li>
+<li>Implement threaded conversations for better message context and organization</li>
+</ul>
+<p>This hands-on walkthrough will help you create a seamless, branded, and interactive chat experience inside Zoom.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Zoom App Message Page: Zoom App Framework" duration="0">
+        <h3 is-upgraded>Add Message icon to the sidebar</h3>
+<p>First add Message icon to the sidebar</p>
+<pre><code language="language-javascript" class="language-javascript">import { Home, Settings, Users, Menu, Newspaper, ChartNoAxesCombined, Send } from &#34;lucide-react&#34;;
+
+....
+
+const navItems = [
+  { href: &#34;/&#34;, label: &#34;Home&#34;, icon: Home },
+  { href: &#34;/users-contacts&#34;, label: &#34;Users&#34;, icon: Users },
+  { href: &#34;/zoomapp/zcx&#34;, label: &#34;App Context&#34;, icon: Newspaper },
+  { href: &#34;/zoomapp/zoom-card&#34;, label: &#34;Message&#34;, icon: Send },
+  { href: &#34;/zoomapp/report&#34;, label: &#34;Report&#34;, icon: ChartNoAxesCombined },
+  { href: &#34;/settings&#34;, label: &#34;Settings&#34;, icon: Settings },
+];
+
+
+</code></pre>
+<h2 is-upgraded>Make API Route to handle cardCompose signature</h2>
+<p><strong>File Path:</strong>: <code>app/api/zoom/sign/route.ts</code></p>
+<pre><code language="language-javascript" class="language-javascript">import { NextRequest, NextResponse } from &#39;next/server&#39;;
+import crypto from &#39;crypto&#39;;
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json();
+
+    const { message } = body;
+
+    if (!message) {
+      return NextResponse.json({ error: &#39;Message parameter is required.&#39; }, { status: 400 });
+    }
+
+    const timestamp = Date.now().toString();
+    const dataToSign = `v0:${timestamp}:${message}`;
+
+    const secret = process.env.ZOOM_CLIENT_SECRET;
+
+    if (!secret) {
+      console.error(&#34;Missing ZOOM_APP_CLIENT_SECRET in environment variables&#34;);
+      return NextResponse.json({ error: &#34;Missing secret&#34; }, { status: 500 });
+    }
+
+    const signature = crypto
+      .createHmac(&#39;sha256&#39;, secret)
+      .update(dataToSign)
+      .digest(&#39;hex&#39;);
+
+    return NextResponse.json({ signature, timestamp });
+  } catch (error) {
+    console.error(&#39;Failed to sign the message:&#39;, error);
+    return NextResponse.json({ error: &#39;Internal server error&#39; }, { status: 500 });
+  }
+}
+
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Make Zoom Preview Card Component" duration="0">
+        <p>update hardcode state value</p>
+<p><strong>File Path:</strong>: <code>app/zoomapp/zoom-card/page.tsx</code></p>
+<pre><code language="language-javascript" class="language-javascript">&#39;use client&#39;;
+
+import { useRef, useState, useEffect, ChangeEvent } from &#34;react&#34;;
+import zoomSdk from &#34;@zoom/appssdk&#34;;
+import { Input } from &#34;@/components/ui/input&#34;;
+import { Button } from &#34;@/components/ui/button&#34;;
+import { Label } from &#34;@/components/ui/label&#34;;
+import { Card, CardContent } from &#34;@/components/ui/card&#34;;
+
+import { getSupabaseUser } from &#34;@/app/lib/token-store&#34;;
+import { createClient } from &#34;@/utils/supabase/client&#34;;
+
+
+interface ChatContext {
+    toJid: string;
+    userJid: string;
+    threadId?: string;
+}
+
+export default function ZoomCardPage() {
+    const [meetingId, setMeetingId] = useState(&#34;97231146424&#34;);
+    const [shareUrl, setShareUrl] = useState(
+        &#34;https://pooja-onelogin-test.zoom.us/rec/share/yZlABeUkEqe8T22L_9uiJY21HgFNt1LaelsTU_X__8xIhC-vVxDV4BtCG-bbESmz.Vd1h6n_U7QRyvZXe&#34;
+    );
+    const [bitmap, setBitmap] = useState(&#34;Placeholder for bitmap&#34;);
+    const [chatContext, setChatContext] = useState&lt;ChatContext | null&gt;(null);
+    const [error, setError] = useState&lt;string | null&gt;(null);
+    const hasRedirected = useRef(false);
+
+    const [textareaMessage, setTextareaMessage] = useState(&#34;&#34;);
+
+
+    // ✅ Configure Zoom SDK on mount
+    useEffect(() =&gt; {
+        zoomSdk.config({
+            capabilities: [
+                &#34;getChatContext&#34;,
+                &#34;composeCard&#34;,
+                &#34;sendMessageToChat&#34;
+            ],
+            version: &#34;0.16.0&#34;,
+        });
+
+        if (!hasRedirected.current) {
+            getSupabaseSessionFromCache();
+        }
+    }, []);
+
+
+    const getSupabaseSessionFromCache = async () =&gt; {
+        const hardcodedState = &#34;093a3ad2b0d815c5180d35ef&#34;;
+
+        try {
+            const tokenData = await getSupabaseUser(hardcodedState);
+            console.log(&#34;🔐 Token data from Redis:&#34;, tokenData);
+
+            const chatCtx = await zoomSdk.getChatContext();
+            console.log(&#34;Chat Context:&#34;, chatCtx);
+
+            if (!tokenData.accessToken || !tokenData.refreshToken) {
+                console.error(&#34;❌ Token data incomplete.&#34;);
+                return;
+            }
+
+            const supabase = createClient();
+            const { data, error } = await supabase.auth.setSession({
+                access_token: tokenData.accessToken,
+                refresh_token: tokenData.refreshToken,
+            });
+
+            if (error) {
+                console.error(&#34;❌ Supabase session set error:&#34;, error.message);
+                return;
+            }
+
+            console.log(&#34;✅ Supabase session set successfully from Redis cache.&#34;);
+
+            // ✅ Prevent future redirects
+            hasRedirected.current = true;
+
+
+        } catch (err) {
+            console.error(&#34;❌ Failed to get Supabase tokens from cache:&#34;, err);
+        }
+    };
+
+    const handleInputChange = (e: ChangeEvent&lt;HTMLInputElement&gt;) =&gt; {
+        const { name, value } = e.target;
+        if (name === &#34;meetingId&#34;) setMeetingId(value);
+        if (name === &#34;shareUrl&#34;) setShareUrl(value);
+        if (name === &#34;bitmap&#34;) setBitmap(value);
+    };
+
+    const sendZoomCard = async () =&gt; {
+        try {
+            const content = {
+                content: {
+                    head: { type: &#34;message&#34;, text: `Meeting ID: ${meetingId}` },
+                    body: [
+                        {
+                            type: &#34;message&#34;,
+                            text: `Share Recording URL: ${shareUrl}`,
+                        },
+                    ],
+                },
+            };
+
+            const message = JSON.stringify(content);
+
+            const res = await fetch(&#34;/api/zoom/sign&#34;, {
+                method: &#34;POST&#34;,
+                body: JSON.stringify({ message }),
+                headers: {
+                    &#34;Content-Type&#34;: &#34;application/json&#34;,
+                },
+            });
+
+            const { signature, timestamp } = await res.json();
+            console.log(&#34;Signature and Timestamp:&#34;, signature, timestamp);
+
+            const card = {
+                type: &#34;interactiveCard&#34;,
+                message,
+                signature,
+                timestamp,
+                previewCard: JSON.stringify({
+                    title: `Meeting ID: ${meetingId}`,
+                    description: `Share URL: ${shareUrl}`,
+                    icon: {
+                        bitmap,
+                    },
+                }),
+            };
+
+
+            const cardcompose = await zoomSdk.composeCard(card);
+            console.log(&#34;Card composed:&#34;, cardcompose);
+
+            if (cardcompose) {
+                console.log(&#34;Card composed successfully&#34;);
+                window.close();
+            } else {
+                console.error(&#34;Failed to compose card&#34;);
+            }
+
+        } catch (e: any) {
+            console.error(&#34;Error creating preview card&#34;, e);
+            setError(e.message || &#34;Unknown error&#34;);
+        }
+    };
+
+    const sendZoomTextMessage = async () =&gt; {
+        try {
+            if (!textareaMessage.trim()) {
+                setError(&#34;Message cannot be empty.&#34;);
+                return;
+            }
+
+            await zoomSdk.sendMessageToChat({ message: textareaMessage });
+            console.log(&#34;✅ Message sent to chat.&#34;);
+            setTextareaMessage(&#34;&#34;);
+            window.close();
+        } catch (e: any) {
+            console.error(&#34;❌ Failed to send message:&#34;, e);
+            setError(e.message || &#34;Unknown error while sending chat message.&#34;);
+        }
+    };
+
+
+    return (
+        &lt;div className=&#34;max-w-xl mx-auto p-6 space-y-6&#34;&gt;
+            &lt;h1 className=&#34;text-2xl font-bold&#34;&gt;Zoom Meeting Card Generator&lt;/h1&gt;
+
+            {error &amp;&amp; (
+                &lt;div className=&#34;text-red-600 bg-red-50 border border-red-300 p-4 rounded&#34;&gt;
+                    Error: {error}
+                &lt;/div&gt;
+            )}
+
+            &lt;Card&gt;
+                &lt;CardContent className=&#34;space-y-4 pt-6&#34;&gt;
+                    &lt;div className=&#34;space-y-1&#34;&gt;
+                        &lt;Label htmlFor=&#34;meetingId&#34;&gt;Meeting ID&lt;/Label&gt;
+                        &lt;Input
+                            id=&#34;meetingId&#34;
+                            name=&#34;meetingId&#34;
+                            value={meetingId}
+                            onChange={handleInputChange}
+                            placeholder=&#34;Enter Meeting ID&#34;
+                        /&gt;
+                    &lt;/div&gt;
+
+                    &lt;div className=&#34;space-y-1&#34;&gt;
+                        &lt;Label htmlFor=&#34;shareUrl&#34;&gt;Share URL&lt;/Label&gt;
+                        &lt;Input
+                            id=&#34;shareUrl&#34;
+                            name=&#34;shareUrl&#34;
+                            value={shareUrl}
+                            onChange={handleInputChange}
+                            placeholder=&#34;Enter Share URL&#34;
+                        /&gt;
+                    &lt;/div&gt;
+
+                    &lt;div className=&#34;space-y-1&#34;&gt;
+                        &lt;Label htmlFor=&#34;bitmap&#34;&gt;Bitmap&lt;/Label&gt;
+                        &lt;Input
+                            id=&#34;bitmap&#34;
+                            name=&#34;bitmap&#34;
+                            value={bitmap}
+                            onChange={handleInputChange}
+                            placeholder=&#34;Enter bitmap string or URL&#34;
+                        /&gt;
+                    &lt;/div&gt;
+
+                    &lt;Button onClick={sendZoomCard} className=&#34;w-full&#34;&gt;
+                        Generate Zoom Card
+                    &lt;/Button&gt;
+                &lt;/CardContent&gt;
+            &lt;/Card&gt;
+
+            {chatContext &amp;&amp; (
+                &lt;div&gt;
+                    &lt;h2 className=&#34;text-lg font-semibold mb-2&#34;&gt;Chat Context:&lt;/h2&gt;
+                    &lt;pre className=&#34;bg-muted p-4 rounded text-sm whitespace-pre-wrap border border-muted-foreground/20&#34;&gt;
+                        {JSON.stringify(chatContext, null, 2)}
+                    &lt;/pre&gt;
+                &lt;/div&gt;
+            )}
+            &lt;Card&gt;
+                &lt;CardContent className=&#34;space-y-4 pt-6&#34;&gt;
+                    &lt;div className=&#34;space-y-1&#34;&gt;
+                        &lt;Label htmlFor=&#34;chatMessage&#34;&gt;Send Chat Message&lt;/Label&gt;
+                        &lt;textarea
+                            id=&#34;chatMessage&#34;
+                            value={textareaMessage}
+                            onChange={(e) =&gt; setTextareaMessage(e.target.value)}
+                            placeholder=&#34;Enter a message to send to chat&#34;
+                            rows={4}
+                            className=&#34;w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring&#34;
+                        /&gt;
+                    &lt;/div&gt;
+                    &lt;Button onClick={sendZoomTextMessage} className=&#34;w-full&#34;&gt;
+                        Send to Chat
+                    &lt;/Button&gt;
+                &lt;/CardContent&gt;
+            &lt;/Card&gt;
+        &lt;/div&gt;
+    );
+}
+
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Conclusion" duration="0">
+        <p>Congratulations! You&#39;ve successfully built a Zoom App Task Manager using Next.js and the Zoom App Framework. Your app now supports a collaborative experience inside Zoom Team Chat, leveraging key features like interactive messages, modals, and SDK-powered APIs.</p>
+<p>You&#39;ve learned how to:</p>
+<ul>
+<li>Integrate with Zoom Team Chat using the App Framework</li>
+<li>Build dynamic UI with Next.js</li>
+<li>Enable real-time collaboration through the Zoom App SDK and REST APIs</li>
+</ul>
+<p>This foundation sets you up to expand your app with additional functionality like third-party integrations, persistence, and workflow automation—all within the Zoom platform.</p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/claat-public/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/prettify.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
