@@ -96,14 +96,14 @@ npm run dev
       </google-codelab-step>
     
       <google-codelab-step label="Overview: Zoom App Framework" duration="0">
-        <p>In this codelab, you&#39;ll learn how to build a collaborative experience in Zoom Team Chat using the Zoom App Framework. You&#39;ll explore how to create rich, interactive messages and modals using the App Card Builder Kit, and how to integrate messaging features using both the Zoom App SDK and Zoom REST APIs.</p>
+        <p>In this codelab, you will learn how to build a collaborative experience in Zoom Team Chat using the Zoom App SDK for Web. The Zoom App Framework uses the client-side Zoom App SDK package and enables you to open webviews to third-party apps through chat compose shortcuts, message shortcuts, and button actions. You will explore how to create rich, interactive messages and modals using the App Card Builder Kit, and how to integrate messaging features using both the Zoom App SDK and Zoom REST APIs.</p>
 <p>By the end of this guide, you&#39;ll be able to:</p>
 <ul>
 <li>Customize chat messages with the App Card Builder Kit</li>
 <li>Display your app&#39;s webview or modal directly within Zoom Team Chat</li>
 <li>Send messages using the Zoom App Context Preview API</li>
-<li>Programmatically send chat messages via the Zoom App SDK&#39;s sendMessage API</li>
-<li>Unfurl URLs and send branded messages using the Zoom REST API unfurl</li>
+<li>Programmatically send chat messages using the sendMessage method from the Zoom App SDK</li>
+<li>Unfurl URLs and send branded messages using the unfurl method from the Zoom REST API</li>
 <li>Implement threaded conversations for better message context and organization</li>
 </ul>
 <p>This hands-on walkthrough will help you create a seamless, branded, and interactive chat experience inside Zoom.</p>
@@ -111,9 +111,8 @@ npm run dev
 
       </google-codelab-step>
     
-      <google-codelab-step label="Zoom App Message Page: Zoom App Framework" duration="0">
-        <p>The <strong>Zoom Apps</strong> framework which uses the client side Zoom Apps SDK package and enables you to open Webviews to third-party apps via chat compose shortcuts, message shortcuts, and button actions.</p>
-<h3 is-upgraded>Add Message icon to the sidebar</h3>
+      <google-codelab-step label="Zoom App Message and App Instances Communication APIs" duration="0">
+        <h3 is-upgraded>Add Message icon to the sidebar</h3>
 <p>First add Message icon to the sidebar</p>
 <pre><code language="language-javascript" class="language-javascript">import { Home, Settings, Users, Menu, Newspaper, ChartNoAxesCombined, Send } from &#34;lucide-react&#34;;
 
