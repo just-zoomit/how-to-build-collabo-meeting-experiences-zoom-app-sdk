@@ -111,8 +111,9 @@ npm run dev
 
       </google-codelab-step>
     
-      <google-codelab-step label="Zoom App SDK: Message and App Instances Communication APIs" duration="0">
-        <h3 is-upgraded>Add Message icon to the sidebar</h3>
+      <google-codelab-step label="Zoom App SDK: cardCompose signature" duration="0">
+        <p>Sends Interactive message and its preview to user&#39;s compose box in chat context. When user posts the card, actual content of the message will be rendered as interactive message</p>
+<h3 is-upgraded>Add Message icon to the sidebar</h3>
 <p>First add Message icon to the sidebar</p>
 <pre><code language="language-javascript" class="language-javascript">import { Home, Settings, Users, Menu, Newspaper, ChartNoAxesCombined, Send } from &#34;lucide-react&#34;;
 
@@ -173,6 +174,8 @@ export async function POST(req: NextRequest) {
     
       <google-codelab-step label="Make Zoom Preview Card Component" duration="0">
         <p>update hardcode state value</p>
+<p>In this section, yuo will use the Zoom App SDK&#39;s app instances communication APIs to send interactive message previews to users in Zoom Team Chat. These previews appear in the compose box and render as interactive messages when posted. In meeting contexts, you will use the broadcast API to deliver JSON messages to all current participants running the app.</p>
+<p>This functionality enables real-time collaboration and seamless message sharing across chat and meeting experiences.</p>
 <p><strong>File Path:</strong>: <code>app/zoomapp/zoom-card/page.tsx</code></p>
 <pre><code language="language-javascript" class="language-javascript">&#39;use client&#39;;
 
