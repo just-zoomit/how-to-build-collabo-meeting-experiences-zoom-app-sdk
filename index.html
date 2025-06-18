@@ -52,9 +52,10 @@
       <google-codelab-step label="What you&#39;ll learn" duration="0">
         <p>How to control the interaction between the app and the Zoom client to build a collaborative experience:</p>
 <ul>
-<li>How to enable and test guest mode</li>
-<li>How to get Zoom Context data</li>
-<li>How to implement logic that accounts for the Zoom running context</li>
+<li>Use the Zoom App SDK to send interactive message previews to users in Zoom Team Chat</li>
+<li>Implement the broadcast API to deliver real-time messages to active app instances in a meeting</li>
+<li>Differentiate between chat and meeting contexts when sending messages</li>
+<li>Enhance collaboration by rendering structured, interactive messages within the Zoom client</li>
 </ul>
 <h2 is-upgraded>What you&#39;ll need</h2>
 <ul>
@@ -174,7 +175,7 @@ export async function POST(req: NextRequest) {
     
       <google-codelab-step label="Make Zoom preview card component" duration="0">
         <p>update hardcode state value</p>
-<p>In this section, yuo will use the Zoom App SDK&#39;s app instances communication APIs to send interactive message previews to users in Zoom Team Chat. These previews appear in the compose box and render as interactive messages when posted. In meeting contexts, you will use the broadcast API to deliver JSON messages to all current participants running the app.</p>
+<p>In this section, you will use the Zoom App SDK&#39;s app instances communication APIs to send interactive message previews to users in Zoom Team Chat. These previews appear in the compose box and render as interactive messages when posted. In meeting contexts, you will use the broadcast API to deliver JSON messages to all current participants running the app.</p>
 <p>This functionality enables real-time collaboration and seamless message sharing across chat and meeting experiences.</p>
 <p><strong>File Path:</strong>: <code>app/zoomapp/zoom-card/page.tsx</code></p>
 <pre><code language="language-javascript" class="language-javascript">&#39;use client&#39;;
@@ -336,8 +337,8 @@ export default function ZoomCardPage() {
             }
 
             await zoomSdk.sendMessageToChat({ message: textareaMessage });
-            console.log(&#34;✅ Message sent to chat.&#34;);
             setTextareaMessage(&#34;&#34;);
+
             window.close();
         } catch (e: any) {
             console.error(&#34;❌ Failed to send message:&#34;, e);
