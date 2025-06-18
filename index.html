@@ -111,30 +111,6 @@ npm run dev
 
       </google-codelab-step>
     
-      <google-codelab-step label="Surface App in Team Chat: Customize messages" duration="0">
-        <p>A <code>dialog</code> surfaces a Zoom app through a modal. This component is the equivalent of a pop-up or dialog box. Under the hood, a modal is a webview that enables you to open your app in other surfaces such as Zoom Mail and Team Chat, making the app more accessible throughout the Zoom Workplace products.</p>
-<p><strong>Example</strong></p>
-<p class="image-container"><img style="width: 500.00px" src="img/1867bbd17ffed5c9.gif"></p>
-<h2 is-upgraded>Update editTask component</h2>
-<p>To enable <code>dialog</code>, create a <code>dialog</code> object with the following properties and add it to the <code>items</code> array of <code>type: "actions"</code>:</p>
-<p><strong>File Path: </strong><code>components/taskmanger/edit-task.tsx</code></p>
-<p><strong>JSON example:</strong></p>
-<pre><code language="language-javascript" class="language-javascript">{
-text: &#34;Open Task List&#34;,
-value: &#34;button2&#34;,
-style: &#34;Default&#34;,
-action: &#34;dialog&#34;, 
-dialog: {
-    size: &#34;M&#34;,
-    link: &#34;https://donte.ngrok.io/zoomapp/zoom-card&#34;, # opens Zoom App home page by defulat
-    title: { text: &#34;Zoom Dashboard&#34; }
-},
-}
-</code></pre>
-
-
-      </google-codelab-step>
-    
       <google-codelab-step label="Zoom App Message Page: Zoom App Framework" duration="0">
         <p>The <strong>Zoom Apps</strong> framework which uses the client side Zoom Apps SDK package and enables you to open Webviews to third-party apps via chat compose shortcuts, message shortcuts, and button actions.</p>
 <h3 is-upgraded>Add Message icon to the sidebar</h3>
@@ -449,6 +425,30 @@ export default function ZoomCardPage() {
     );
 }
 
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Surface App in Team Chat: Customize messages" duration="0">
+        <p>A <code>dialog</code> surfaces a Zoom app through a modal. This component is the equivalent of a pop-up or dialog box. Under the hood, a modal is a webview that enables you to open your app in other surfaces such as Zoom Mail and Team Chat, making the app more accessible throughout the Zoom Workplace products.</p>
+<p><strong>Example</strong></p>
+<p class="image-container"><img style="width: 500.00px" src="img/1867bbd17ffed5c9.gif"></p>
+<h2 is-upgraded>Update editTask component</h2>
+<p>To enable <code>dialog</code>, create a <code>dialog</code> object with the following properties and add it to the <code>items</code> array of <code>type: "actions"</code>:</p>
+<p><strong>File Path: </strong><code>components/taskmanger/edit-task.tsx</code></p>
+<p><strong>JSON example:</strong></p>
+<pre><code language="language-javascript" class="language-javascript">{
+text: &#34;Open Task List&#34;,
+value: &#34;button2&#34;,
+style: &#34;Default&#34;,
+action: &#34;dialog&#34;, 
+dialog: {
+    size: &#34;M&#34;,
+    link: &#34;https://donte.ngrok.io/zoomapp/zoom-card&#34;, # opens Zoom App home page by defulat
+    title: { text: &#34;Zoom Dashboard&#34; }
+},
+}
 </code></pre>
 
 
