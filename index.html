@@ -114,23 +114,6 @@ npm run dev
     
       <google-codelab-step label="Zoom App SDK: cardCompose signature" duration="0">
         <p>Sends Interactive message and its preview to user&#39;s compose box in chat context. When user posts the card, actual content of the message will be rendered as interactive message</p>
-<h3 is-upgraded>Add Message icon to the sidebar</h3>
-<p>First add Message icon to the sidebar</p>
-<pre><code language="language-javascript" class="language-javascript">import { Home, Settings, Users, Menu, Newspaper, ChartNoAxesCombined, Send } from &#34;lucide-react&#34;;
-
-....
-
-const navItems = [
-  { href: &#34;/&#34;, label: &#34;Home&#34;, icon: Home },
-  { href: &#34;/users-contacts&#34;, label: &#34;Users&#34;, icon: Users },
-  { href: &#34;/zoomapp/zcx&#34;, label: &#34;App Context&#34;, icon: Newspaper },
-  { href: &#34;/zoomapp/zoom-card&#34;, label: &#34;Message&#34;, icon: Send },
-  { href: &#34;/zoomapp/report&#34;, label: &#34;Report&#34;, icon: ChartNoAxesCombined },
-  { href: &#34;/settings&#34;, label: &#34;Settings&#34;, icon: Settings },
-];
-
-
-</code></pre>
 <h2 is-upgraded>Make API Route to handle cardCompose signature</h2>
 <p><strong>File Path:</strong>: <code>app/api/zoom/sign/route.ts</code></p>
 <pre><code language="language-javascript" class="language-javascript">import { NextRequest, NextResponse } from &#39;next/server&#39;;
@@ -205,10 +188,7 @@ export default function ZoomCardPage() {
     const [bitmap, setBitmap] = useState(&#34;Placeholder for bitmap&#34;);
     const [chatContext, setChatContext] = useState&lt;ChatContext | null&gt;(null);
     const [error, setError] = useState&lt;string | null&gt;(null);
-    const hasRedirected = useRef(false);
-
     const [textareaMessage, setTextareaMessage] = useState(&#34;&#34;);
-
 
     // ✅ Configure Zoom SDK on mount
     useEffect(() =&gt; {
@@ -226,126 +206,12 @@ export default function ZoomCardPage() {
         }
     }, []);
 
-
-    const getSupabaseSessionFromCache = async () =&gt; {
-        const hardcodedState = &#34;093a3ad2b0d815c5180d35ef&#34;;
-
-        try {
-            const tokenData = await getSupabaseUser(hardcodedState);
-            console.log(&#34;🔐 Token data from Redis:&#34;, tokenData);
-
-            const chatCtx = await zoomSdk.getChatContext();
-            console.log(&#34;Chat Context:&#34;, chatCtx);
-
-            if (!tokenData.accessToken || !tokenData.refreshToken) {
-                console.error(&#34;❌ Token data incomplete.&#34;);
-                return;
-            }
-
-            const supabase = createClient();
-            const { data, error } = await supabase.auth.setSession({
-                access_token: tokenData.accessToken,
-                refresh_token: tokenData.refreshToken,
-            });
-
-            if (error) {
-                console.error(&#34;❌ Supabase session set error:&#34;, error.message);
-                return;
-            }
-
-            console.log(&#34;✅ Supabase session set successfully from Redis cache.&#34;);
-
-            // ✅ Prevent future redirects
-            hasRedirected.current = true;
-
-
-        } catch (err) {
-            console.error(&#34;❌ Failed to get Supabase tokens from cache:&#34;, err);
-        }
-    };
-
     const handleInputChange = (e: ChangeEvent&lt;HTMLInputElement&gt;) =&gt; {
         const { name, value } = e.target;
         if (name === &#34;meetingId&#34;) setMeetingId(value);
         if (name === &#34;shareUrl&#34;) setShareUrl(value);
         if (name === &#34;bitmap&#34;) setBitmap(value);
     };
-
-    const sendZoomCard = async () =&gt; {
-        try {
-            const content = {
-                content: {
-                    head: { type: &#34;message&#34;, text: `Meeting ID: ${meetingId}` },
-                    body: [
-                        {
-                            type: &#34;message&#34;,
-                            text: `Share Recording URL: ${shareUrl}`,
-                        },
-                    ],
-                },
-            };
-
-            const message = JSON.stringify(content);
-
-            const res = await fetch(&#34;/api/zoom/sign&#34;, {
-                method: &#34;POST&#34;,
-                body: JSON.stringify({ message }),
-                headers: {
-                    &#34;Content-Type&#34;: &#34;application/json&#34;,
-                },
-            });
-
-            const { signature, timestamp } = await res.json();
-            console.log(&#34;Signature and Timestamp:&#34;, signature, timestamp);
-
-            const card = {
-                type: &#34;interactiveCard&#34;,
-                message,
-                signature,
-                timestamp,
-                previewCard: JSON.stringify({
-                    title: `Meeting ID: ${meetingId}`,
-                    description: `Share URL: ${shareUrl}`,
-                    icon: {
-                        bitmap,
-                    },
-                }),
-            };
-
-
-            const cardcompose = await zoomSdk.composeCard(card);
-            console.log(&#34;Card composed:&#34;, cardcompose);
-
-            if (cardcompose) {
-                console.log(&#34;Card composed successfully&#34;);
-                window.close();
-            } else {
-                console.error(&#34;Failed to compose card&#34;);
-            }
-
-        } catch (e: any) {
-            console.error(&#34;Error creating preview card&#34;, e);
-            setError(e.message || &#34;Unknown error&#34;);
-        }
-    };
-
-    const sendZoomTextMessage = async () =&gt; {
-        try {
-            if (!textareaMessage.trim()) {
-                setError(&#34;Message cannot be empty.&#34;);
-                return;
-            }
-
-            await zoomSdk.sendMessageToChat({ message: textareaMessage });
-            setTextareaMessage(&#34;&#34;);
-
-            window.close();
-        } catch (e: any) {
-            console.error(&#34;❌ Failed to send message:&#34;, e);
-            setError(e.message || &#34;Unknown error while sending chat message.&#34;);
-        }
-    };
-
 
     return (
         &lt;div className=&#34;max-w-xl mx-auto p-6 space-y-6&#34;&gt;
@@ -428,6 +294,124 @@ export default function ZoomCardPage() {
     );
 }
 
+</code></pre>
+<h2 is-upgraded>Manage modal session and cookies data</h2>
+<p>When a Zoom App is opened in Zoom Team Chat, the WebView inside the chat environment maintains its own set of cookies and session data, independent from other contexts.</p>
+<p>If the Zoom App is opened during a meeting, the in-meeting WebView also maintains a separate session. After the meeting ends and the in-meeting WebView closes, the main client WebView may automatically refresh and inherit session cookies from the in-meeting WebView.</p>
+<p>To maintain consistent session state, you will use the user&#39;s state value to retrieve the latest provider token. Use this token with setSession to update the session for the Zoom Team Chat instance.</p>
+<pre><code language="language-javascript" class="language-javascript"> const getSupabaseSessionFromCache = async () =&gt; {
+        const hardcodedState = &#34;093a3ad2b0d815c5180d35ef&#34;;
+
+        try {
+            const tokenData = await getSupabaseUser(hardcodedState);
+            console.log(&#34;🔐 Token data from Redis:&#34;, tokenData);
+
+            const chatCtx = await zoomSdk.getChatContext();
+            console.log(&#34;Chat Context:&#34;, chatCtx);
+
+            if (!tokenData.accessToken || !tokenData.refreshToken) {
+                console.error(&#34;❌ Token data incomplete.&#34;);
+                return;
+            }
+
+            const supabase = createClient();
+            const { data, error } = await supabase.auth.setSession({
+                access_token: tokenData.accessToken,
+                refresh_token: tokenData.refreshToken,
+            });
+
+            if (error) {
+                console.error(&#34;❌ Supabase session set error:&#34;, error.message);
+                return;
+            }
+
+            console.log(&#34;✅ Supabase session set successfully from Redis cache.&#34;);
+
+
+
+        } catch (err) {
+            console.error(&#34;❌ Failed to get Supabase tokens from cache:&#34;, err);
+        }
+    };
+</code></pre>
+<h2 is-upgraded>CardCompose</h2>
+<p>Sends Interactive message and its preview to user&#39;s compose box in chat context. When user posts the card, actual content of the message will be rendered as interactive message</p>
+<pre><code language="language-javascript" class="language-javascript"> const sendZoomCard = async () =&gt; {
+        try {
+            const content = {
+                content: {
+                    head: { type: &#34;message&#34;, text: `Meeting ID: ${meetingId}` },
+                    body: [
+                        {
+                            type: &#34;message&#34;,
+                            text: `Share Recording URL: ${shareUrl}`,
+                        },
+                    ],
+                },
+            };
+
+            const message = JSON.stringify(content);
+
+            const res = await fetch(&#34;/api/zoom/sign&#34;, {
+                method: &#34;POST&#34;,
+                body: JSON.stringify({ message }),
+                headers: {
+                    &#34;Content-Type&#34;: &#34;application/json&#34;,
+                },
+            });
+
+            const { signature, timestamp } = await res.json();
+            console.log(&#34;Signature and Timestamp:&#34;, signature, timestamp);
+
+            const card = {
+                type: &#34;interactiveCard&#34;,
+                message,
+                signature,
+                timestamp,
+                previewCard: JSON.stringify({
+                    title: `Meeting ID: ${meetingId}`,
+                    description: `Share URL: ${shareUrl}`,
+                    icon: {
+                        bitmap,
+                    },
+                }),
+            };
+
+
+            const cardcompose = await zoomSdk.composeCard(card);
+            console.log(&#34;Card composed:&#34;, cardcompose);
+
+            if (cardcompose) {
+                console.log(&#34;Card composed successfully&#34;);
+                window.close();
+            } else {
+                console.error(&#34;Failed to compose card&#34;);
+            }
+
+        } catch (e: any) {
+            console.error(&#34;Error creating preview card&#34;, e);
+            setError(e.message || &#34;Unknown error&#34;);
+        }
+    };
+</code></pre>
+<h2 is-upgraded>Meeting Actions Method Zoom App SDK API</h2>
+<p>Use this API to sends a message to a chat channel or meeting chat channel.</p>
+<pre><code language="language-javascript" class="language-javascript">const sendZoomTextMessage = async () =&gt; {
+        try {
+            if (!textareaMessage.trim()) {
+                setError(&#34;Message cannot be empty.&#34;);
+                return;
+            }
+
+            await zoomSdk.sendMessageToChat({ message: textareaMessage });
+            setTextareaMessage(&#34;&#34;);
+
+            window.close();
+        } catch (e: any) {
+            console.error(&#34;❌ Failed to send message:&#34;, e);
+            setError(e.message || &#34;Unknown error while sending chat message.&#34;);
+        }
+    };
 </code></pre>
 
 
