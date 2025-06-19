@@ -192,10 +192,19 @@ export async function POST(req: NextRequest) {
  });
 
  ...
- const userId = uid;
 
- // maps user to their latest state
- await redis.set(`user:${userId}:latestState`, state,{ ex: 3600 });      
+ // Only write to Redis if *both* uid and state are present
+ if (uid &amp;&amp; state) {
+   try {
+     await redis.set(`user:${uid}:latestState`, state, { ex: 3600 });
+     console.log(&#34;☑️  Saved latestState to Redis&#34;);
+   } catch (e) {
+     console.error(&#34;❌ Upstash write failed:&#34;, e);
+     return NextResponse.json({ error: &#34;Redis write failed&#34; }, { status: 500 });
+   }
+ } else {
+   console.log(&#34;ℹ No state in context (or missing uid) — skipping Redis write&#34;);
+ }   
 
  ..
 
@@ -495,6 +504,292 @@ dialog: {
     title: { text: &#34;Zoom Dashboard&#34; }
 },
 }
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add Auth Logic to Sidebar" duration="0">
+        <p><strong>File Path: </strong><code>components/sidebar.tsx</code></p>
+<pre><code language="language-javascript" class="language-javascript">const [collapsed, setCollapsed] = useState(false);
+  const supabase = createClient();
+
+  const [user, setUser] = useState(null as null | { id: string });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() =&gt; {
+    // 1) Listen for all auth events
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) =&gt; {
+      // whenever they sign in or out, session.user will be either a User or null
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
+  
+    // 2) Fetch initial session (won&#39;t throw if there&#39;s no session)
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) =&gt; {
+        setUser(session?.user ?? null);
+      })
+      .catch((err) =&gt; {
+        console.error(&#34;Error getting initial session:&#34;, err);
+        setUser(null);
+        return redirect(&#34;/&#34;);
+      })
+      .finally(() =&gt; {
+        setLoading(false);
+      });
+  
+    // 3) Clean up listener
+    return () =&gt; {
+      subscription.unsubscribe();
+    };
+  }, [supabase]);
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Update Layout CSS for Sidebar Support" duration="0">
+        
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Add CSS for Sidebar" duration="0">
+        <p><strong>File Path: </strong><code>app/layout.tsx</code></p>
+<pre><code language="language-javascript" class="language-javascript">import { EnvVarWarning } from &#34;@/components/layout/env-var-warning&#34;;
+import HeaderAuth from &#34;@/components/auth/header-auth&#34;;
+import { ThemeSwitcher } from &#34;@/components/layout/theme-switcher&#34;;
+import { hasEnvVars } from &#34;@/utils/supabase/check-env-vars&#34;;
+import { ThemeProvider } from &#34;next-themes&#34;;
+import Link from &#34;next/link&#34;;
+import &#34;./globals.css&#34;;
+
+import Sidebar from &#34;@/components/sidebar&#34;;
+
+const defaultUrl = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : &#34;http://localhost:3000&#34;;
+
+export const metadata = {
+  metadataBase: new URL(defaultUrl),
+  title: &#34;Next.js and Supabase Starter Kit&#34;,
+  description: &#34;The fastest way to build apps with Next.js and Supabase&#34;,
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+      &lt;html lang=&#34;en&#34; className=&#34;h-full&#34; suppressHydrationWarning&gt;
+
+      &lt;body suppressHydrationWarning className=&#34;h-screen bg-background text-foreground&#34;&gt;
+        &lt;ThemeProvider
+          attribute=&#34;class&#34;
+          defaultTheme=&#34;system&#34;
+          enableSystem
+          disableTransitionOnChange
+        &gt;
+            
+         
+          {/* Outer container to make Sidebar and main content side-by-side */}
+          &lt;div className=&#34;flex h-full&#34;&gt;
+
+              {/* Sidebar on the left */}
+           &lt;Sidebar /&gt;
+
+           
+
+            {/* Main content on the right */}
+            &lt;main className=&#34;flex-1 flex flex-col&#34;&gt;
+              &lt;div className=&#34;w-full flex flex-col gap-20 items-center&#34;&gt;
+                {/* Top Navigation */}
+                &lt;nav className=&#34;w-full flex justify-center border-b border-b-foreground/10 h-16&#34;&gt;
+                &lt;div className=&#34;w-full max-w-5xl flex justify-between items-center p-3 px-5 text-sm&#34;&gt;
+                    &lt;div className=&#34;flex gap-5 items-center font-semibold&#34;&gt;
+                      &lt;Link href={&#34;/&#34;}&gt;Zoom Task Manager&lt;/Link&gt;
+                    &lt;/div&gt;
+                    {!hasEnvVars ? &lt;EnvVarWarning /&gt; : &lt;HeaderAuth /&gt;}
+                  &lt;/div&gt;
+                &lt;/nav&gt;
+
+                {/* Page content */}
+                &lt;div className=&#34;flex-1 overflow-auto p-5 max-w-5xl mx-auto&#34;&gt;
+                {children}
+                &lt;/div&gt;
+
+                {/* Footer */}
+                &lt;footer className=&#34;w-full flex items-center justify-center border-t text-xs gap-8 py-16&#34;&gt;
+                &lt;p&gt;
+                    Powered by{&#34; &#34;}
+                    &lt;a
+                      href=&#34;https://supabase.com/?utm_source=create-next-app&amp;utm_medium=template&amp;utm_term=nextjs&#34;
+                      target=&#34;_blank&#34;
+                      className=&#34;font-bold hover:underline&#34;
+                      rel=&#34;noreferrer&#34;
+                    &gt;
+                      Supabase
+                    &lt;/a&gt;
+                  &lt;/p&gt;
+                  &lt;ThemeSwitcher /&gt;
+                &lt;/footer&gt;
+              &lt;/div&gt;
+            &lt;/main&gt;
+          &lt;/div&gt;
+        &lt;/ThemeProvider&gt;
+      &lt;/body&gt;
+
+    &lt;/html&gt;
+  );
+}
+
+</code></pre>
+<h2 is-upgraded>Update Global CSS</h2>
+<pre><code language="language-javascript" class="language-javascript">html,
+body,
+#__next {
+  height: 100%;
+}
+
+</code></pre>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Update Logic to support third party OAuth" duration="0">
+        <h2 is-upgraded>Update Zoom Home Page setSession Logic</h2>
+<p><strong>File Path: </strong><code>components/zoomapp-sdk/zoom-app.tsx</code></p>
+<pre><code language="language-javascript" class="language-javascript">....
+ // Reference for the onAuthorized listener
+  const onAuthorizedRef = useRef&lt;(event: any) =&gt; void&gt;(() =&gt; {});
+
+  // Zoom SDK configuration
+  const initializeZoomSDK = async () =&gt; {
+    try {
+      await zoomSdk.config({
+        capabilities: [
+          &#34;authorize&#34;,
+          &#34;onAuthorized&#34;,
+          &#34;promptAuthorize&#34;,
+          &#34;getUserContext&#34;,
+          &#34;onMyUserContextChange&#34;,
+          &#34;openUrl&#34;,
+        ],
+      });
+
+      setIsConfigured(true);
+      console.log(&#34;✅ Zoom SDK configured&#34;);
+    } catch (error) {
+      console.error(&#34;❌ Zoom SDK config error:&#34;, error);
+    }
+  };
+
+  // One-time effect: initialize SDK and wire up listener
+  useEffect(() =&gt; {
+    // define handler
+    const handler = (event: any) =&gt; {
+      console.log(&#34;🎯 onAuthorized triggered&#34;, event);
+      // call session hydration when Zoom in-client flow completes
+      setAuthStatus(&#34;loading&#34;);
+      handleSupabaseSession(event.state);
+    };
+
+    onAuthorizedRef.current = handler;
+    zoomSdk.addEventListener(&#34;onAuthorized&#34;, handler);
+
+    initializeZoomSDK();
+
+    return () =&gt; {
+      console.log(&#34;🧹 Cleaning up Zoom SDK event listener&#34;);
+      zoomSdk.removeEventListener(&#34;onAuthorized&#34;, onAuthorizedRef.current);
+    };
+  }, []);
+
+  // Only hydrate Supabase session when `state` param appears
+  useEffect(() =&gt; {
+    if (!state) return;
+    console.log(&#34;✅ state is present, hydrating supabase session...&#34;);
+    setAuthStatus(&#34;loading&#34;);
+    handleSupabaseSession(state);
+  }, [state]);
+
+  // Shared hydration logic
+  const handleSupabaseSession = async (cacheState: string) =&gt; {
+    try {
+      const tokenData = await getSupabaseUser(cacheState);
+      console.log(&#34;🔐 Token data from Redis:&#34;, tokenData);
+
+      if (!tokenData.accessToken || !tokenData.refreshToken) {
+        console.error(&#34;❌ Token data incomplete.&#34;);
+        setAuthStatus(&#34;error&#34;);
+        return;
+      }
+
+      const supabase = createClient();
+      const { error } = await supabase.auth.setSession({
+        access_token: tokenData.accessToken,
+        refresh_token: tokenData.refreshToken,
+      });
+
+      if (error) {
+        console.error(&#34;❌ Supabase session set error:&#34;, error.message);
+        setAuthStatus(&#34;error&#34;);
+        return;
+      }
+
+      console.log(&#34;✅ Supabase session set successfully from Redis cache.&#34;);
+      setAuthStatus(&#34;success&#34;);
+      window.location.href = &#34;/dashboard&#34;;
+    } catch (err) {
+      console.error(&#34;❌ Failed to get Supabase tokens from cache:&#34;, err);
+      setAuthStatus(&#34;error&#34;);
+    }
+  };
+....
+</code></pre>
+<h2 is-upgraded>Add Logout Button Component</h2>
+<p>File Path: <code>components/logoutbutton.tsx</code></p>
+<pre><code language="language-javascript" class="language-javascript">// components/LogoutButton.tsx
+&#34;use client&#34;;
+
+import { useRouter } from &#34;next/navigation&#34;;
+import { createClient } from &#34;@/utils/supabase/client&#34;;
+
+export default function LogoutButton() {
+  const supabase = createClient();
+  const router = useRouter();
+
+  const onLogout = async () =&gt; {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error(&#34;Logout failed:&#34;, error);
+      return;
+    }
+    // hide your sidebar immediately via onAuthStateChange...
+    // then force a full reload:
+    window.location.replace(&#34;/&#34;);
+  };
+
+  return &lt;button onClick={onLogout}&gt;Log out&lt;/button&gt;;
+}
+
+</code></pre>
+<h3 is-upgraded>Update User Nav</h3>
+<p>File Path; <code>components/auth/user-nav.tsx</code></p>
+<pre><code language="language-javascript" class="language-javascript">import {signOutAction} from &#34;@/app/actions&#34;;
+import LogoutButton from &#34;@/components/logoutbutton&#34;;
+
+...
+  {/* &lt;DropdownMenuItem onClick={signOutAction}&gt; */}
+    {/* &lt;Link href=&#34;&#34;&gt;Log out&lt;/Link&gt; */}
+            &lt;DropdownMenuItem asChild&gt;
+             &lt;LogoutButton /&gt;
+             &lt;/DropdownMenuItem&gt;
+...
 </code></pre>
 
 
