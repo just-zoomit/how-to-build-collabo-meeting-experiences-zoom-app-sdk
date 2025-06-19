@@ -112,9 +112,11 @@ npm run dev
 
       </google-codelab-step>
     
-      <google-codelab-step label="Zoom App SDK: cardCompose signature" duration="0">
-        <p>Sends Interactive message and its preview to user&#39;s compose box in chat context. When user posts the card, actual content of the message will be rendered as interactive message</p>
-<h2 is-upgraded>Make API Route to handle cardCompose signature</h2>
+      <google-codelab-step label="Zoom App SDK: Sign cardCompose interactive message" duration="0">
+        <p>To send an interactive message preview to a user&#39;s compose box in Zoom Team Chat, you must sign the message payload. Zoom uses this signature to validate the message&#39;s integrity before executing any interactive actions.</p>
+<p>Zoom requires an HMAC-SHA256 signature using your Zoom App Client Secret, along with the message content and a timestamp.</p>
+<h2 is-upgraded>Create API route to sign interactive message</h2>
+<p>This API route receives the message string and returns a signature and timestamp, which are needed to post the signed interactive message.</p>
 <p><strong>File Path:</strong>: <code>app/api/zoom/sign/route.ts</code></p>
 <pre><code language="language-javascript" class="language-javascript">import { NextRequest, NextResponse } from &#39;next/server&#39;;
 import crypto from &#39;crypto&#39;;
