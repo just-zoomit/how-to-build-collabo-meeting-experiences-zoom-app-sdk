@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
   <meta name="theme-color" content="#4F7DC9">
   <meta charset="UTF-8">
-  <title>Integrate multi-feature app integration: Zoom App Framework</title>
+  <title>Build collaborative Zoom Team Chat experiences: Zoom Apps framework</title>
   <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
   <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
@@ -24,7 +24,7 @@
   <google-codelab codelab-gaid=""
                   codelab-ga4id=""
                   id="how-to-build-collabo-team-chat-zoomapp-framework"
-                  title="Integrate multi-feature app integration: Zoom App Framework"
+                  title="Build collaborative Zoom Team Chat experiences: Zoom Apps framework"
                   environment="web"
                   feedback-link="https://devforum.zoom.us/c/zoom-apps">
     
@@ -185,11 +185,11 @@ export async function POST(req: NextRequest) {
 </code></pre>
 <h2 is-upgraded>Store secondary key in Home Route <code>/api/zoom/entry</code></h2>
 <p>In your <code>/api/zoom/entry</code> route , after extracting the Zoom context (which includes <code>userId</code>), add:</p>
-<pre><code language="language-javascipt" class="language-javascipt">   import { Redis } from &#34;@upstash/redis&#34;
-   const redis = new Redis({
-   url: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_URL,
-   token: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_TOKEN,
-   });
+<pre><code language="language-javascipt" class="language-javascipt"> import { Redis } from &#34;@upstash/redis&#34;
+ const redis = new Redis({
+ url: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_URL,
+ token: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_TOKEN,
+ });
 
  ...
  const userId = uid;
