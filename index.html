@@ -185,7 +185,13 @@ export async function POST(req: NextRequest) {
 </code></pre>
 <h2 is-upgraded>Store secondary key in Home Route <code>/api/zoom/entry</code></h2>
 <p>In your <code>/api/zoom/entry</code> route , after extracting the Zoom context (which includes <code>userId</code>), add:</p>
-<pre><code language="language-javascipt" class="language-javascipt"> ...
+<pre><code language="language-javascipt" class="language-javascipt">   import { Redis } from &#34;@upstash/redis&#34;
+   const redis = new Redis({
+   url: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_URL,
+   token: process.env.NEXT_PUBLIC_UPSTASH_REDIS_REST_TOKEN,
+   });
+
+ ...
  const userId = uid;
 
  // maps user to their latest state
