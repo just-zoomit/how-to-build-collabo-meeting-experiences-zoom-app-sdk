@@ -158,6 +158,29 @@ export async function POST(req: NextRequest) {
 
       </google-codelab-step>
     
+      <google-codelab-step label="Secondary Redis key based on userId" duration="0">
+        <p>Because session and cookie data does not persist across Zoom products (e.g., between Meeting and Team Chat), the Supabase session must be re-established when the app context changes.</p>
+<p>To handle this, you&#39;ll continue using the state parameter for your OAuth flow, but also store the token data under a secondary Redis key based on the userId on the app&#39;s Home route. This helps that:</p>
+<ul>
+<li>The Team Chat instance can retrieve the latest tokens using the userId from the Zoom context</li>
+<li>The Supabase session can be reinitialized seamlessly without requiring re-authentication</li>
+</ul>
+<h2 is-upgraded>How to do it:</h2>
+<p>In your <code>/api/zoom/entry</code> route , after extracting the Zoom context (which includes <code>userId</code>), add:</p>
+<pre><code language="language-javascipt" class="language-javascipt"> ...
+ const userId = uid;
+
+ // maps user to their latest state
+ await redis.set(`user:${userId}:latestState`, state,{ ex: 3600 });      
+
+ ..
+
+</code></pre>
+<p>This allows both Meeting and Team Chat contexts to access the token, even when sessions are isolated.</p>
+
+
+      </google-codelab-step>
+    
       <google-codelab-step label="Make Zoom preview card component" duration="0">
         <p>update hardcode state value</p>
 <p>In this section, you will use the Zoom App SDK&#39;s app instances communication APIs to send interactive message previews to users in Zoom Team Chat. These previews appear in the compose box and render as interactive messages when posted. In meeting contexts, you will use the broadcast API to deliver JSON messages to all current participants running the app.</p>
