@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
 
       </google-codelab-step>
     
-      <google-codelab-step label="Secondary Redis key based on userId" duration="0">
+      <google-codelab-step label="Add secondary Redis key based on userId" duration="0">
         <p>Because sessions and cookies don&#39;t persist across Zoom surfaces (like Meeting and Team Chat), the Supabase session must be re-established when the app is opened in a new context.</p>
 <p>To support this, you&#39;ll continue using the state parameter in your OAuth flow, but also store the latest token data under a secondary Redis key based on the userId when the app loads on the Home route. This helps that:</p>
 <ul>
