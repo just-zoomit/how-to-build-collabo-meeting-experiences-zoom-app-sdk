@@ -184,12 +184,12 @@ interface ChatContext {
 
 export default function ZoomCardPage() {
     const [meetingId, setMeetingId] = useState(&#34;97231146424&#34;);
-    const [shareUrl, setShareUrl] = useState(
-        &#34;https://pooja-onelogin-test.zoom.us/rec/share/yZlABeUkEqe8T22L_9uiJY21HgFNt1LaelsTU_X__8xIhC-vVxDV4BtCG-bbESmz.Vd1h6n_U7QRyvZXe&#34;
-    );
+    const [shareUrl, setShareUrl] = useState(&#34; https://saveoj.us&#34;);
     const [bitmap, setBitmap] = useState(&#34;Placeholder for bitmap&#34;);
     const [chatContext, setChatContext] = useState&lt;ChatContext | null&gt;(null);
     const [error, setError] = useState&lt;string | null&gt;(null);
+    const hasRedirected = useRef(false);
+
     const [textareaMessage, setTextareaMessage] = useState(&#34;&#34;);
 
     // ✅ Configure Zoom SDK on mount
@@ -304,39 +304,41 @@ export default function ZoomCardPage() {
 <p>If the Zoom App is opened during a meeting, the in-meeting WebView also maintains a separate session. After the meeting ends and the in-meeting WebView closes, the main client WebView may automatically refresh and inherit session cookies from the in-meeting WebView.</p>
 <p>To maintain consistent session state, you will use the user&#39;s state value to retrieve the latest provider token. Use this token with setSession to update the session for the Zoom Team Chat instance.</p>
 <pre><code language="language-javascript" class="language-javascript"> const getSupabaseSessionFromCache = async () =&gt; {
-        const hardcodedState = &#34;093a3ad2b0d815c5180d35ef&#34;;
-
         try {
-            const tokenData = await getSupabaseUser(hardcodedState);
-            console.log(&#34;🔐 Token data from Redis:&#34;, tokenData);
-
-            const chatCtx = await zoomSdk.getChatContext();
-            console.log(&#34;Chat Context:&#34;, chatCtx);
-
-            if (!tokenData.accessToken || !tokenData.refreshToken) {
-                console.error(&#34;❌ Token data incomplete.&#34;);
-                return;
-            }
-
-            const supabase = createClient();
-            const { data, error } = await supabase.auth.setSession({
-                access_token: tokenData.accessToken,
-                refresh_token: tokenData.refreshToken,
-            });
-
-            if (error) {
-                console.error(&#34;❌ Supabase session set error:&#34;, error.message);
-                return;
-            }
-
-            console.log(&#34;✅ Supabase session set successfully from Redis cache.&#34;);
-
-
-
-        } catch (err) {
-            console.error(&#34;❌ Failed to get Supabase tokens from cache:&#34;, err);
+          const userId = &#39;vbDj8eUxRduts0tAN29trA&#39;
+      
+          // 🔁 Get latest state for this user
+          const state = await getSupabaseUserbyId(userId);
+          console.log(&#34;🔑 Retrieved state for user:&#34;, state);
+      
+          // 🔐 Fetch token data using the retrieved state
+          const tokenData = await getSupabaseUser(state);
+          console.log(&#34;🔐 Redis PRovider Token:&#34;, tokenData);
+          
+          if (!tokenData.accessToken || !tokenData.refreshToken) {
+            console.error(&#34;❌ Token data incomplete.&#34;);
+            return;
         }
-    };
+
+      
+          const supabase = createClient();
+          const { data, error } = await supabase.auth.setSession({
+            access_token: tokenData.accessToken,
+            refresh_token: tokenData.refreshToken,
+          });
+      
+          if (error) {
+            console.error(&#34;❌ Supabase session set error:&#34;, error.message);
+            return;
+          }
+      
+          console.log(&#34;✅ Supabase session set successfully from Redis cache.&#34;);
+          hasRedirected.current = true;
+      
+        } catch (err) {
+          console.error(&#34;❌ Failed to get Supabase tokens from cache:&#34;, err);
+        }
+      };
 </code></pre>
 <h2 is-upgraded>CardCompose</h2>
 <p>Sends Interactive message and its preview to user&#39;s compose box in chat context. When user posts the card, actual content of the message will be rendered as interactive message</p>
