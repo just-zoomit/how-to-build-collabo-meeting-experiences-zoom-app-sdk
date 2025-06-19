@@ -159,13 +159,31 @@ export async function POST(req: NextRequest) {
       </google-codelab-step>
     
       <google-codelab-step label="Secondary Redis key based on userId" duration="0">
-        <p>Because session and cookie data does not persist across Zoom products (e.g., between Meeting and Team Chat), the Supabase session must be re-established when the app context changes.</p>
-<p>To handle this, you&#39;ll continue using the state parameter for your OAuth flow, but also store the token data under a secondary Redis key based on the userId on the app&#39;s Home route. This helps that:</p>
+        <p>Because sessions and cookies don&#39;t persist across Zoom surfaces (like Meeting and Team Chat), the Supabase session must be re-established when the app is opened in a new context.</p>
+<p>To support this, you&#39;ll continue using the state parameter in your OAuth flow, but also store the latest token data under a secondary Redis key based on the userId when the app loads on the Home route. This helps that:</p>
 <ul>
 <li>The Team Chat instance can retrieve the latest tokens using the userId from the Zoom context</li>
 <li>The Supabase session can be reinitialized seamlessly without requiring re-authentication</li>
 </ul>
-<h2 is-upgraded>How to do it:</h2>
+<h2 is-upgraded>Add getSupabaseUserById helper</h2>
+<p>Create a helper function to fetch the user&#39;s Supabase session token by userId from Upstash Redis.</p>
+<p><strong>File Path: </strong><code>app/lib/token-store.js</code></p>
+<pre><code language="language-javascript" class="language-javascript">// Get Supabase tokens for a user
+  getSupabaseUserbyId: async function (userId) {
+
+    const key = `user:${userId}:latestState`;
+    const raw = await redis.get(key);
+
+    if (!raw) {
+      console.log(&#34;Supabase user token not found in Redis&#34;);
+      throw new Error(&#34;User not found&#34;);
+    }
+
+    return raw;
+  }
+
+</code></pre>
+<h2 is-upgraded>Store secondary key in Home Route <code>/api/zoom/entry</code></h2>
 <p>In your <code>/api/zoom/entry</code> route , after extracting the Zoom context (which includes <code>userId</code>), add:</p>
 <pre><code language="language-javascipt" class="language-javascipt"> ...
  const userId = uid;
